@@ -1,4 +1,4 @@
-package finalProject;
+package FinalProject;
 
 import javafx.util.Pair;
 

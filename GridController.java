@@ -1,18 +1,21 @@
-package finalProject;
+package FinalProject;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+
+import java.util.ArrayList;
+import java.util.ListIterator;
 
 public class GridController
 {
@@ -20,6 +23,11 @@ public class GridController
 	private static final Color HOVER_PANE_COLOR = Color.web("#8C8973");
 	private static final Color WRONG_PANE_COLOR = Color.web("#FA4646");
 	private static final Color BORDER_COLOR = Color.web("#474641");
+
+	private static final Font NUMBER_FONT = new Font("Cambria", 24);
+
+	@FXML
+	private AnchorPane background;
 
 	@FXML
 	private GridPane grid_5;
@@ -40,7 +48,8 @@ public class GridController
 			for (int col = 0; col < size; col++) {
 				Pane pane = new Pane();
 				pane.setBackground(new Background(new BackgroundFill(UNKNOWN_PANE_COLOR, CornerRadii.EMPTY, Insets.EMPTY)));
-				pane.setBorder(new Border(new BorderStroke(BORDER_COLOR, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+				// replaced with actual lines
+				//				pane.setBorder(new Border(new BorderStroke(BORDER_COLOR, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 
 				pane.setOnMouseEntered(e -> onMouseEntered(pane));
 				pane.setOnMouseExited(e -> onMouseExited(pane));
@@ -48,6 +57,66 @@ public class GridController
 				DragHandler.makeDraggable(pane);
 				grid.add(pane, col, row);
 				paneEntries[row][col] = pane;
+			}
+		}
+	}
+
+	private void drawLines(GridPane grid, int size) {
+		double layoutX = grid.getLayoutX(), layoutY = grid.getLayoutY();
+		int paneSize = (int) (grid.getPrefWidth() / size);
+		// spawn vertical lines
+		for (int i = 0; i <= size; i++) {
+			Line line = new Line(0, -160, 0, grid.getPrefHeight());
+			line.setLayoutX(layoutX + i * paneSize);
+			line.setLayoutY(layoutY);
+			line.setStroke(BORDER_COLOR);
+			background.getChildren().add(line);
+		}
+
+		// spawn horizontal lines
+		for (int i = 0; i <= size; i++) {
+			Line line = new Line(-160, 0, grid.getPrefWidth(), 0);
+			line.setLayoutX(layoutX);
+			line.setLayoutY(layoutY + i * paneSize);
+			line.setStroke(BORDER_COLOR);
+			background.getChildren().add(line);
+		}
+	}
+
+	private void generateText(Nonogram level, GridPane grid, int size) {
+		double layoutX = grid.getLayoutX(), layoutY = grid.getLayoutY();
+		int paneSize = (int) (grid.getPrefWidth() / size);
+		ArrayList<ArrayList<Integer>> rowPanes = level.getRowPanes(), colPanes = level.getColPanes();
+
+		// generate text for rows
+		for (int i = 0; i < size; i++) {
+			ArrayList<Integer> rowCount = rowPanes.get(i);
+			ListIterator<Integer> it = rowCount.listIterator(rowCount.size());
+			int offset = 0;
+			while (it.hasPrevious()) {
+				int c = it.previous();
+				Text text = new Text(Integer.toString(c));
+				text.setLayoutX(layoutX + offset * 20 - 20);
+				text.setLayoutY(layoutY + i * paneSize + 70);
+				text.setFont(NUMBER_FONT);
+				background.getChildren().add(text);
+				offset--;
+			}
+		}
+
+		// generate text for columns
+		for (int i = 0; i < size; i++) {
+			ArrayList<Integer> colCount = colPanes.get(i);
+			ListIterator<Integer> it = colCount.listIterator(colCount.size());
+			int offset = 0;
+			while (it.hasPrevious()) {
+				int c = it.previous();
+				Text text = new Text(Integer.toString(c));
+				text.setLayoutX(layoutX + i * paneSize + 55);
+				text.setLayoutY(layoutY + offset * 25 - 10);
+				text.setFont(NUMBER_FONT);
+				background.getChildren().add(text);
+				offset--;
 			}
 		}
 	}
@@ -60,12 +129,18 @@ public class GridController
 		switch (level.getSize()) {
 			case 5:
 				initializePane(grid_5, 5);
+				drawLines(grid_5, 5);
+				generateText(level, grid_5, 5);
 				break;
 			case 10:
 				initializePane(grid_10, 10);
+				drawLines(grid_10, 10);
+				generateText(level, grid_10, 10);
 				break;
 			case 15:
 				initializePane(grid_15, 15);
+				drawLines(grid_15, 15);
+				generateText(level, grid_15, 15);
 				break;
 			default:
 				return;
