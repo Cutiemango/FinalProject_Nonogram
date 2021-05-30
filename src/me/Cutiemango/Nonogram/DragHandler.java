@@ -1,4 +1,4 @@
-package FinalProject;
+package me.Cutiemango.Nonogram;
 
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;

@@ -1,4 +1,4 @@
-package FinalProject;
+package me.Cutiemango.Nonogram;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.ResourceBundle;
@@ -33,7 +35,7 @@ public class LevelController implements Initializable
 
 				Scene gameScene = new Scene(game, 1200, 900);
 				gameScene.getRoot().requestFocus();
-				Launcher.setScene(gameScene);
+				GameLauncher.setScene(gameScene);
 
 				System.out.println("[LevelController] Trying to switch to game...");
 			}
@@ -45,30 +47,25 @@ public class LevelController implements Initializable
 	}
 
 	private void loadNonogram() {
-		File assetDir = new File(getClass().getResource("./assets/level/").getPath());
-		for (File file : assetDir.listFiles()) {
-			String fileName = file.getName();
-			int i = fileName.lastIndexOf('.');
-			String name = fileName.substring(0, i);
-			if (i > 0 && fileName.substring(i + 1).equals("txt")) {
-				// file extension is txt
-				try {
-					Nonogram nonogram = readNonogramFromFile(file);
-					Image image = new Image(file.toURI().toString().replace(".txt", ".png"));
-					nonogram.setImage(image);
-					levelMap.put(name, nonogram);
-					System.out.println("[LevelController] Successfully read nonogram: " + name);
-				}
-				catch (IOException e) {
-					System.out.println("[LevelController] Error while reading nonogram: " + name);
-					e.printStackTrace();
-				}
+		try {
+			InputStream listOfLevels = Main.getResourceAsStream("/assets/level/levels.txt");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(listOfLevels));
+			String levelName;
+			while ((levelName = reader.readLine()) != null) {
+				Nonogram nonogram = readNonogramFromStream(Main.getResourceAsStream("/assets/level/" + levelName + ".txt"));
+				Image image = new Image(Main.getResource("/assets/level/" + levelName + ".png").toString());
+				nonogram.setImage(image);
+				levelMap.put(levelName, nonogram);
+				System.out.println("[LevelController] Successfully read nonogram: " + levelName);
 			}
+		} catch (IOException e) {
+			System.out.println("[LevelController] An error occurred while reading nonogram data...");
+			e.printStackTrace();
 		}
 	}
 
-	private Nonogram readNonogramFromFile(File txtFile) throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(txtFile));
+	private Nonogram readNonogramFromStream(InputStream stream) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		// the first line is the size
 		int size = Integer.parseInt(reader.readLine());
 		boolean[][] map = new boolean[size][size];
@@ -88,7 +85,7 @@ public class LevelController implements Initializable
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
-		gameFXML = new FXMLLoader(getClass().getResource("assets/Game.fxml"));
+		gameFXML = new FXMLLoader(Main.getResource("/assets/Game.fxml"));
 
 		loadNonogram();
 	}

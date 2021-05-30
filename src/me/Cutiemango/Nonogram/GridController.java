@@ -1,4 +1,4 @@
-package FinalProject;
+package me.Cutiemango.Nonogram;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;

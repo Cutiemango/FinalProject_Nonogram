@@ -1,4 +1,4 @@
-package FinalProject;
+package me.Cutiemango.Nonogram;
 
 import javafx.util.Pair;
 
