@@ -6,6 +6,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.util.Pair;
+import me.Cutiemango.Nonogram.Difficulty;
 import me.Cutiemango.Nonogram.GameLauncher;
 import me.Cutiemango.Nonogram.GameManager;
 import me.Cutiemango.Nonogram.Main;
@@ -16,83 +21,110 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class LevelController implements Initializable
 {
-	private static final HashMap<String, Nonogram> levelMap = new HashMap<>();
+	private final Pair<Integer, Integer>[] LAYOUT_4 = new Pair[] { new Pair<>(275, 275), new Pair<>(275, 600), new Pair<>(700, 275),
+			new Pair<>(700, 600) };
+	private final Pair<Integer, Integer>[] LAYOUT_2 = new Pair[] { new Pair<>(275, 400), new Pair<>(700, 400) };
+
+	private Image unsolved_level;
+	private FXMLLoader difficultyFXML;
 	private FXMLLoader gameFXML;
+	private Parent difficultySelection;
+	private Parent game;
+
+	@FXML
+	private AnchorPane backgroundPane;
+
+	@FXML
+	private ImageView background;
 
 	public void startLevel(String levelID) {
-		if (levelMap.containsKey(levelID)) {
-			Nonogram level = levelMap.get(levelID);
+		GameManager.getLevel(levelID).ifPresent(level -> {
 			try {
-				Parent game = gameFXML.load();
-
-				GridController controller = gameFXML.getController();
-				controller.startLevel(level);
-
-				GameManager.startNewGame(level);
-
-				Scene gameScene = new Scene(game, 1200, 900);
-				gameScene.getRoot().requestFocus();
-				GameLauncher.setScene(gameScene);
-
-				System.out.println("[LevelController] Trying to switch to game...");
+				game = gameFXML.load();
 			}
 			catch (IOException e) {
-				System.out.println("[LevelController] Error while trying to switch to game");
 				e.printStackTrace();
 			}
+
+			GridController controller = gameFXML.getController();
+			controller.startLevel(level);
+
+			GameManager.startNewGame(level);
+
+			Scene gameScene = new Scene(game);
+			gameScene.getRoot().requestFocus();
+			GameLauncher.setScene(gameScene);
+
+			System.out.println("[LevelController] Trying to switch to game...");
+		});
+	}
+
+	public void chooseDifficulty(Difficulty difficulty) {
+		background.setImage(new Image(Main.getResource("/assets/background/difficulty_" + difficulty.toString().toLowerCase() + ".png").toString()));
+
+		switch (difficulty) {
+			case EASY:
+				setupLevels(LAYOUT_4, GameManager.EASY_LEVELS);
+				break;
+			case NORMAL:
+				setupLevels(LAYOUT_4, GameManager.NORMAL_LEVELS);
+				break;
+			case HARD:
+				setupLevels(LAYOUT_2, GameManager.HARD_LEVELS);
+				break;
 		}
 	}
 
-	private void loadNonogram() {
-		try {
-			InputStream listOfLevels = Main.getResourceAsStream("/assets/level/levels.txt");
-			BufferedReader reader = new BufferedReader(new InputStreamReader(listOfLevels));
-			String levelName;
-			while ((levelName = reader.readLine()) != null) {
-				Nonogram nonogram = readNonogramFromStream(Main.getResourceAsStream("/assets/level/" + levelName + ".txt"));
-				Image image = new Image(Main.getResource("/assets/level/" + levelName + ".png").toString());
-				nonogram.setImage(image);
-				levelMap.put(levelName, nonogram);
-				System.out.println("[LevelController] Successfully read nonogram: " + levelName);
-			}
-		} catch (IOException e) {
-			System.out.println("[LevelController] An error occurred while reading nonogram data...");
-			e.printStackTrace();
-		}
-	}
+	private void setupLevels(Pair<Integer, Integer>[] levelPos, List<Nonogram> levels) {
+		for (int i = 0; i < levelPos.length; i++) {
+			Pair<Integer, Integer> pos = levelPos[i];
+			Nonogram level = levels.get(i);
 
-	private Nonogram readNonogramFromStream(InputStream stream) throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-		// the first line is the size
-		int size = Integer.parseInt(reader.readLine());
-		int total = 0;
-		boolean[][] map = new boolean[size][size];
-		for (int i = 0; i < size; i++) {
-			String[] row = reader.readLine().split(" ");
-			for (int j = 0; j < size; j++) {
-				if (row[j].equals("1")) {
-					map[i][j] = true;
-					total++;
-				}
-			}
+			ImageView levelBlock = new ImageView(unsolved_level);
+			levelBlock.setFitHeight(200);
+			levelBlock.setFitWidth(200);
+			levelBlock.setLayoutX(pos.getKey());
+			levelBlock.setLayoutY(pos.getValue());
+
+			ImageView levelImage = new ImageView(level.getImage());
+			levelImage.setFitHeight(170);
+			levelImage.setFitWidth(170);
+			levelImage.setLayoutX(pos.getKey() + 15);
+			levelImage.setLayoutY(pos.getValue() + 15);
+			levelImage.setOnMouseClicked(e -> startLevel(level.getID()));
+			levelImage.setVisible(GameManager.hasFinishedLevel(level.getID()));
+
+			backgroundPane.getChildren().add(levelBlock);
+			backgroundPane.getChildren().add(levelImage);
 		}
-		return new Nonogram(size, total, map);
 	}
 
 	@FXML
-	public void onClick() {
-		startLevel("taxi");
+	private void onClickBack() {
+		try {
+			difficultySelection = difficultyFXML.load();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Scene difficultyScene = new Scene(difficultySelection);
+		difficultyScene.getRoot().requestFocus();
+		GameLauncher.setScene(difficultyScene);
+
+		System.out.println("[LevelController] Going back to difficulty selection...");
 	}
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		difficultyFXML = new FXMLLoader(Main.getResource("/assets/DifficultySelection.fxml"));
 		gameFXML = new FXMLLoader(Main.getResource("/assets/Game.fxml"));
 
-		loadNonogram();
+		unsolved_level = new Image(Main.getResource("/assets/background/unsolved_level.png").toString());
 	}
 }

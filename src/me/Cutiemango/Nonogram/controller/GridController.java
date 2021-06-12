@@ -30,7 +30,7 @@ public class GridController
 	private static final Font NUMBER_FONT = new Font("Cambria", 24);
 
 	@FXML
-	private AnchorPane background;
+	private AnchorPane backgroundPane;
 
 	@FXML
 	private GridPane grid_5;
@@ -70,7 +70,7 @@ public class GridController
 			line.setLayoutX(layoutX + i * paneSize);
 			line.setLayoutY(layoutY);
 			line.setStroke(BORDER_COLOR);
-			background.getChildren().add(line);
+			backgroundPane.getChildren().add(line);
 		}
 
 		// spawn horizontal lines
@@ -79,7 +79,7 @@ public class GridController
 			line.setLayoutX(layoutX);
 			line.setLayoutY(layoutY + i * paneSize);
 			line.setStroke(BORDER_COLOR);
-			background.getChildren().add(line);
+			backgroundPane.getChildren().add(line);
 		}
 	}
 
@@ -120,7 +120,7 @@ public class GridController
 				text.setLayoutX(layoutX + offset - 20);
 				text.setLayoutY(layoutY + i * paneSize + MAGIC_Y);
 				text.setFont(NUMBER_FONT);
-				background.getChildren().add(text);
+				backgroundPane.getChildren().add(text);
 				offset -= 20;
 			}
 		}
@@ -136,7 +136,7 @@ public class GridController
 				text.setLayoutX(layoutX + i * paneSize + MAGIC_X);
 				text.setLayoutY(layoutY + offset - 10);
 				text.setFont(NUMBER_FONT);
-				background.getChildren().add(text);
+				backgroundPane.getChildren().add(text);
 				offset -= 25;
 			}
 		}

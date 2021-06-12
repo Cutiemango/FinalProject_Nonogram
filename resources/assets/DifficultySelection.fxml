@@ -6,14 +6,19 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.Cutiemango.Nonogram.controller.DifficultyController">
    <children>
-      <ImageView fitHeight="900.0" fitWidth="1200.0" onMouseMoved="#onMouseMove" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="900.0" fitWidth="1200.0" onMouseClicked="#onMouseClicked" onMouseMoved="#onMouseMove" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@background/difficulty.png" />
          </image>
       </ImageView>
-      <ImageView fx:id="arrow" fitHeight="100.0" fitWidth="250.0" layoutX="580.0" layoutY="565.0" onMouseMoved="#onMouseMove" pickOnBounds="true" preserveRatio="true">
+      <ImageView fx:id="arrow" fitHeight="100.0" fitWidth="250.0" layoutX="580.0" layoutY="565.0" onMouseClicked="#onMouseClicked" onMouseMoved="#onMouseMove" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@background/difficulty_arrow.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="180.0" fitWidth="240.0" layoutX="20.0" layoutY="20.0" onMouseClicked="#onClickBack" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@background/back_arrow.png" />
          </image>
       </ImageView>
    </children>

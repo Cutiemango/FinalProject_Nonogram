@@ -6,7 +6,8 @@ import java.util.ArrayList;
 
 public class Nonogram
 {
-	public Nonogram(int size, int totalPanes, boolean[][] map) {
+	public Nonogram(String id, int size, int totalPanes, boolean[][] map) {
+		this.id = id;
 		this.size = size;
 		this.totalPanes = totalPanes;
 		this.map = map;
@@ -16,6 +17,7 @@ public class Nonogram
 		countPanes();
 	}
 
+	private String id;
 	private int size;
 	private int totalPanes;
 	private boolean[][] map;
@@ -56,6 +58,10 @@ public class Nonogram
 
 	public boolean isValid(int x, int y) {
 		return map[x][y];
+	}
+
+	public String getID() {
+		return id;
 	}
 
 	public int getSize() {
