@@ -1,6 +1,7 @@
 package me.Cutiemango.Nonogram;
 
 import javafx.util.Pair;
+import me.Cutiemango.Nonogram.controller.GridController;
 
 import java.util.LinkedList;
 
@@ -10,11 +11,13 @@ public class GameManager
 
 	private static Nonogram currentLevel;
 	private static int currentHealth;
+	private static int remainingPanes;
 	private static boolean[][] currentPanes;
 
 	public static void startNewGame(Nonogram level) {
 		currentLevel = level;
 		currentHealth = MAX_HEALTH;
+		remainingPanes = level.getTotalPanes();
 
 		int size = level.getSize();
 		currentPanes = new boolean[size][size];
@@ -48,13 +51,25 @@ public class GameManager
 			} else {
 				GridController.reveal(x, y);
 				currentPanes[x][y] = true;
+				remainingPanes--;
 			}
 		}
+
+		checkGameFinished();
 	}
 
 	public static boolean hasSelected(int x, int y) {
 		return currentPanes[x][y];
 	}
+
+	private static void checkGameFinished() {
+		if (remainingPanes == 0) {
+			System.out.println("[Game] Congratulations! You've finished the puzzle!");
+		} else if (remainingPanes < 5) {
+			System.out.printf("[Game] %d pieces remaining.\n", remainingPanes);
+		}
+	}
+
 
 	private static void checkGameOver() {
 		if (currentHealth <= 0) {

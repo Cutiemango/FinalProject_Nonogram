@@ -1,4 +1,4 @@
-package me.Cutiemango.Nonogram;
+package me.Cutiemango.Nonogram.controller;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -6,10 +6,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import me.Cutiemango.Nonogram.GameLauncher;
+import me.Cutiemango.Nonogram.GameManager;
+import me.Cutiemango.Nonogram.Main;
+import me.Cutiemango.Nonogram.Nonogram;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -68,19 +70,23 @@ public class LevelController implements Initializable
 		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		// the first line is the size
 		int size = Integer.parseInt(reader.readLine());
+		int total = 0;
 		boolean[][] map = new boolean[size][size];
 		for (int i = 0; i < size; i++) {
 			String[] row = reader.readLine().split(" ");
 			for (int j = 0; j < size; j++) {
-				map[i][j] = row[j].equals("1");
+				if (row[j].equals("1")) {
+					map[i][j] = true;
+					total++;
+				}
 			}
 		}
-		return new Nonogram(size, map);
+		return new Nonogram(size, total, map);
 	}
 
 	@FXML
 	public void onClick() {
-		startLevel("odoka");
+		startLevel("taxi");
 	}
 
 	@Override

@@ -6,8 +6,9 @@ import java.util.ArrayList;
 
 public class Nonogram
 {
-	public Nonogram(int size, boolean[][] map) {
+	public Nonogram(int size, int totalPanes, boolean[][] map) {
 		this.size = size;
+		this.totalPanes = totalPanes;
 		this.map = map;
 		this.rowPanes = new ArrayList<>();
 		this.colPanes = new ArrayList<>();
@@ -16,6 +17,7 @@ public class Nonogram
 	}
 
 	private int size;
+	private int totalPanes;
 	private boolean[][] map;
 	private ArrayList<ArrayList<Integer>> rowPanes, colPanes;
 	private Image image;
@@ -60,6 +62,10 @@ public class Nonogram
 		return size;
 	}
 
+	public int getTotalPanes() {
+		return totalPanes;
+	}
+
 	public Image getImage() {
 		return image;
 	}
@@ -75,4 +81,5 @@ public class Nonogram
 	public void setImage(Image image) {
 		this.image = image;
 	}
+
 }

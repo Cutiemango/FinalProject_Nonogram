@@ -4,6 +4,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
+import me.Cutiemango.Nonogram.controller.GridController;
 
 import java.util.LinkedList;
 

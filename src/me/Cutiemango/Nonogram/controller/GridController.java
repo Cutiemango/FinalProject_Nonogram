@@ -1,4 +1,4 @@
-package me.Cutiemango.Nonogram;
+package me.Cutiemango.Nonogram.controller;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -13,6 +13,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import me.Cutiemango.Nonogram.DragHandler;
+import me.Cutiemango.Nonogram.GameManager;
+import me.Cutiemango.Nonogram.Nonogram;
 
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -22,7 +25,7 @@ public class GridController
 	private static final Color UNKNOWN_PANE_COLOR = Color.web("#E3CE96");
 	private static final Color HOVER_PANE_COLOR = Color.web("#8C8973");
 	private static final Color WRONG_PANE_COLOR = Color.web("#FA4646");
-	private static final Color BORDER_COLOR = Color.web("#474641");
+	private static final Color BORDER_COLOR = Color.web("#222222");
 
 	private static final Font NUMBER_FONT = new Font("Cambria", 24);
 
@@ -48,9 +51,6 @@ public class GridController
 			for (int col = 0; col < size; col++) {
 				Pane pane = new Pane();
 				pane.setBackground(new Background(new BackgroundFill(UNKNOWN_PANE_COLOR, CornerRadii.EMPTY, Insets.EMPTY)));
-				// replaced with actual lines
-				//				pane.setBorder(new Border(new BorderStroke(BORDER_COLOR, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
-
 				pane.setOnMouseEntered(e -> onMouseEntered(pane));
 				pane.setOnMouseExited(e -> onMouseExited(pane));
 
@@ -88,6 +88,25 @@ public class GridController
 		int paneSize = (int) (grid.getPrefWidth() / size);
 		ArrayList<ArrayList<Integer>> rowPanes = level.getRowPanes(), colPanes = level.getColPanes();
 
+		final int MAGIC_X, MAGIC_Y;
+		switch (size) {
+			case 5:
+				MAGIC_X = 55;
+				MAGIC_Y = 70;
+				break;
+			case 10:
+				MAGIC_X = 25;
+				MAGIC_Y = 40;
+				break;
+			case 15:
+				MAGIC_X = 15;
+				MAGIC_Y = 30;
+				break;
+			default:
+				System.out.println("[GridController] Invalid input size.");
+				return;
+		}
+
 		// generate text for rows
 		for (int i = 0; i < size; i++) {
 			ArrayList<Integer> rowCount = rowPanes.get(i);
@@ -96,11 +115,13 @@ public class GridController
 			while (it.hasPrevious()) {
 				int c = it.previous();
 				Text text = new Text(Integer.toString(c));
-				text.setLayoutX(layoutX + offset * 20 - 20);
-				text.setLayoutY(layoutY + i * paneSize + 70);
+				if (c >= 10)
+					offset -= 15;
+				text.setLayoutX(layoutX + offset - 20);
+				text.setLayoutY(layoutY + i * paneSize + MAGIC_Y);
 				text.setFont(NUMBER_FONT);
 				background.getChildren().add(text);
-				offset--;
+				offset -= 20;
 			}
 		}
 
@@ -112,11 +133,11 @@ public class GridController
 			while (it.hasPrevious()) {
 				int c = it.previous();
 				Text text = new Text(Integer.toString(c));
-				text.setLayoutX(layoutX + i * paneSize + 55);
-				text.setLayoutY(layoutY + offset * 25 - 10);
+				text.setLayoutX(layoutX + i * paneSize + MAGIC_X);
+				text.setLayoutY(layoutY + offset - 10);
 				text.setFont(NUMBER_FONT);
 				background.getChildren().add(text);
-				offset--;
+				offset -= 25;
 			}
 		}
 	}

@@ -18,8 +18,8 @@ public class GameLauncher extends Application
 	@Override
 	public void start(Stage stage) throws Exception {
 		currentStage = stage;
-		Parent root = FXMLLoader.load(Main.getResource("/assets/LevelSelection.fxml"));
-		menuScene = new Scene(root, 600, 400);
+		Parent root = FXMLLoader.load(Main.getResource("/assets/Menu.fxml"));
+		menuScene = new Scene(root, 1200, 900);
 
 		currentStage.setTitle("Nonogram");
 		currentStage.setScene(menuScene);
@@ -28,5 +28,9 @@ public class GameLauncher extends Application
 
 	public static void setScene(Scene scene) {
 		currentStage.setScene(scene);
+	}
+
+	public static void exit() {
+		currentStage.close();
 	}
 }
