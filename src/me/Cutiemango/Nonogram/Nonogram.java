@@ -17,11 +17,11 @@ public class Nonogram
 		countPanes();
 	}
 
-	private String id;
-	private int size;
-	private int totalPanes;
-	private boolean[][] map;
-	private ArrayList<ArrayList<Integer>> rowPanes, colPanes;
+	private final String id;
+	private final int size;
+	private final int totalPanes;
+	private final boolean[][] map;
+	private final ArrayList<ArrayList<Integer>> rowPanes, colPanes;
 	private Image image;
 
 	private void countPanes() {

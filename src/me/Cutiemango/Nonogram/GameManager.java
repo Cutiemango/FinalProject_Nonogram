@@ -2,7 +2,7 @@ package me.Cutiemango.Nonogram;
 
 import javafx.scene.image.Image;
 import javafx.util.Pair;
-import me.Cutiemango.Nonogram.controller.GridController;
+import me.Cutiemango.Nonogram.controller.GameController;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +16,8 @@ import java.util.Optional;
 
 public class GameManager
 {
-	private static final int MAX_HEALTH = 5;
+	public static final int MAX_HEALTH = 5;
+	public static Difficulty SELECTED_DIFFICULTY = Difficulty.EASY;
 
 	public static final List<Nonogram> EASY_LEVELS = new ArrayList<>();
 	public static final List<Nonogram> NORMAL_LEVELS = new ArrayList<>();
@@ -47,9 +48,10 @@ public class GameManager
 				// a pane is wrong!
 				fail = true;
 				currentPanes[x][y] = true;
-				GridController.setWrongColor(x, y);
+				GameController.setWrongColor(x, y);
 				System.out.println("[Game] Selected wrong pane! HP - 1!");
 				currentHealth -= 1;
+				GameController.removeHeartPen();
 				checkGameOver();
 				break;
 			}
@@ -61,9 +63,9 @@ public class GameManager
 				continue;
 
 			if (fail) {
-				GridController.setNormalColor(x, y);
+				GameController.setNormalColor(x, y);
 			} else {
-				GridController.reveal(x, y);
+				GameController.reveal(x, y);
 				currentPanes[x][y] = true;
 				remainingPanes--;
 			}
@@ -91,6 +93,10 @@ public class GameManager
 
 	public static Optional<Nonogram> getLevel(String id) {
 		return Optional.ofNullable(levelMap.get(id));
+	}
+
+	public static int getCurrentHealth() {
+		return currentHealth;
 	}
 
 	private static void checkGameOver() {

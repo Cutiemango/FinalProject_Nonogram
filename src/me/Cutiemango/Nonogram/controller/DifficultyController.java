@@ -1,30 +1,22 @@
 package me.Cutiemango.Nonogram.controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Rotate;
 import me.Cutiemango.Nonogram.Difficulty;
 import me.Cutiemango.Nonogram.GameLauncher;
-import me.Cutiemango.Nonogram.Main;
+import me.Cutiemango.Nonogram.GameManager;
+import me.Cutiemango.Nonogram.GameScene;
 import me.Cutiemango.Nonogram.Vector2D;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class DifficultyController implements Initializable
 {
 	private final Vector2D pivot = new Vector2D(580, 570);
-
-	private FXMLLoader levelFXML;
-	private FXMLLoader menuFXML;
-	private Parent levelSelection;
-	private Parent menu;
 
 	@FXML
 	private ImageView arrow;
@@ -57,46 +49,29 @@ public class DifficultyController implements Initializable
 		if (degree < 175 && degree > 5)
 			return;
 
-		try {
-			levelSelection = levelFXML.load();
-		}
-		catch (IOException ex) {
-			ex.printStackTrace();
-		}
+		LevelController controller = GameLauncher.transitionTo(GameScene.LEVEL_SELECTION);
+		controller.resetNodes();
 
-		LevelController controller = levelFXML.getController();
 		if (degree > -60 && degree <= 5)
-			controller.chooseDifficulty(Difficulty.HARD);
+			GameManager.SELECTED_DIFFICULTY = Difficulty.HARD;
 		else if (degree <= -60 && degree > -120)
-			controller.chooseDifficulty(Difficulty.NORMAL);
+			GameManager.SELECTED_DIFFICULTY = Difficulty.NORMAL;
 		else
-			controller.chooseDifficulty(Difficulty.EASY);
+			GameManager.SELECTED_DIFFICULTY = Difficulty.EASY;
 
-		Scene levelScene = new Scene(levelSelection);
-		levelScene.getRoot().requestFocus();
-		GameLauncher.setScene(levelScene);
+		controller.chooseDifficulty(GameManager.SELECTED_DIFFICULTY);
+
 		System.out.println("[DifficultyController] Switching to level selection...");
 	}
 
 	@FXML
 	private void onClickBack() {
-		try {
-			menu = menuFXML.load();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		Scene difficultyScene = new Scene(menu);
-		difficultyScene.getRoot().requestFocus();
-		GameLauncher.setScene(difficultyScene);
-
+		GameLauncher.transitionTo(GameScene.MENU);
 		System.out.println("[LevelController] Going back to difficulty selection...");
 	}
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
-		levelFXML = new FXMLLoader(Main.getResource("/assets/LevelSelection.fxml"));
-		menuFXML = new FXMLLoader(Main.getResource("/assets/Menu.fxml"));
-
 		arrow.getTransforms().add(new Rotate(0, 0, 50));
 	}
 }

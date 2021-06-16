@@ -4,7 +4,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.util.Pair;
-import me.Cutiemango.Nonogram.controller.GridController;
+import me.Cutiemango.Nonogram.controller.GameController;
 
 import java.util.LinkedList;
 
@@ -42,7 +42,7 @@ public class DragHandler
 
 		while (!selectedPanes.isEmpty()) {
 			Pair<Integer, Integer> selected = selectedPanes.pop();
-			GridController.setNormalColor(selected.getKey(), selected.getValue());
+			GameController.setNormalColor(selected.getKey(), selected.getValue());
 		}
 
 		// if the axis is different, we need to clear all selected panes
@@ -52,13 +52,13 @@ public class DragHandler
 			// select region on x-axis
 			for (int i = 0; i <= deltaX; i++) {
 				int dx = Math.min(x, sx) + i;
-				GridController.setHoverColor(dx, sy);
+				GameController.setHoverColor(dx, sy);
 				selectedPanes.add(new Pair<>(dx, sy));
 			}
 		} else {
 			for (int i = 0; i <= deltaY; i++) {
 				int dy = Math.min(y, sy) + i;
-				GridController.setHoverColor(sx, dy);
+				GameController.setHoverColor(sx, dy);
 				selectedPanes.add(new Pair<>(sx, dy));
 			}
 		}

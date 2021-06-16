@@ -1,7 +1,12 @@
 package me.Cutiemango.Nonogram.controller;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
@@ -13,19 +18,27 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
+import javafx.util.Pair;
 import me.Cutiemango.Nonogram.DragHandler;
+import me.Cutiemango.Nonogram.GameLauncher;
 import me.Cutiemango.Nonogram.GameManager;
+import me.Cutiemango.Nonogram.GameScene;
+import me.Cutiemango.Nonogram.Main;
 import me.Cutiemango.Nonogram.Nonogram;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.ListIterator;
 
-public class GridController
+public class GameController
 {
-	private static final Color UNKNOWN_PANE_COLOR = Color.web("#E3CE96");
+	private static final Color UNKNOWN_PANE_COLOR = Color.web("#FFFFFF");
 	private static final Color HOVER_PANE_COLOR = Color.web("#8C8973");
 	private static final Color WRONG_PANE_COLOR = Color.web("#FA4646");
 	private static final Color BORDER_COLOR = Color.web("#222222");
+	private static final Color FONT_COLOR = Color.web("#FFFFFF");
 
 	private static final Font NUMBER_FONT = new Font("Cambria", 24);
 
@@ -42,7 +55,31 @@ public class GridController
 	@FXML
 	private ImageView image;
 
+	@FXML
+	private ImageView lever;
+
+	private LeverState state = LeverState.O;
+	private boolean isTransitioning = false;
+	private final List<Node> addedNodes = new ArrayList<>();
+
 	private static Pane[][] paneEntries;
+	private static final List<Pair<Integer, Integer>> O_TO_X, X_TO_R;
+	private static final List<ImageView> HEART_PENS = new ArrayList<>();
+
+	static {
+		O_TO_X = new ArrayList<>();
+		O_TO_X.add(new Pair<>(950, 210));
+		O_TO_X.add(new Pair<>(1000, 210));
+		O_TO_X.add(new Pair<>(1000, 300));
+		O_TO_X.add(new Pair<>(970, 320));
+
+		X_TO_R = new ArrayList<>();
+		X_TO_R.add(new Pair<>(950, 360));
+		X_TO_R.add(new Pair<>(935, 360));
+		X_TO_R.add(new Pair<>(935, 390));
+		X_TO_R.add(new Pair<>(975, 390));
+		X_TO_R.add(new Pair<>(975, 450));
+	}
 
 	private void initializePane(GridPane grid, int size) {
 		paneEntries = new Pane[size][size];
@@ -61,6 +98,25 @@ public class GridController
 		}
 	}
 
+	private void spawnHeartPens() {
+		int posX = 770, posY = 700;
+		Image heartPen =  new Image(Main.getResource("/assets/background/heartpen.png").toString());
+		for (int i = 0; i < GameManager.MAX_HEALTH; i++) {
+			ImageView heart = new ImageView(heartPen);
+			heart.setLayoutX(posX + i * 80);
+			heart.setLayoutY(posY);
+			heart.setFitWidth(100);
+			heart.setFitHeight(150);
+			backgroundPane.getChildren().add(heart);
+			HEART_PENS.add(heart);
+		}
+	}
+
+	public static void removeHeartPen() {
+		int index = GameManager.getCurrentHealth();
+		HEART_PENS.get(index).setVisible(false);
+	}
+
 	private void drawLines(GridPane grid, int size) {
 		double layoutX = grid.getLayoutX(), layoutY = grid.getLayoutY();
 		int paneSize = (int) (grid.getPrefWidth() / size);
@@ -71,6 +127,7 @@ public class GridController
 			line.setLayoutY(layoutY);
 			line.setStroke(BORDER_COLOR);
 			backgroundPane.getChildren().add(line);
+			addedNodes.add(line);
 		}
 
 		// spawn horizontal lines
@@ -80,6 +137,7 @@ public class GridController
 			line.setLayoutY(layoutY + i * paneSize);
 			line.setStroke(BORDER_COLOR);
 			backgroundPane.getChildren().add(line);
+			addedNodes.add(line);
 		}
 	}
 
@@ -88,7 +146,7 @@ public class GridController
 		int paneSize = (int) (grid.getPrefWidth() / size);
 		ArrayList<ArrayList<Integer>> rowPanes = level.getRowPanes(), colPanes = level.getColPanes();
 
-		final int MAGIC_X, MAGIC_Y;
+		int MAGIC_X, MAGIC_Y;
 		switch (size) {
 			case 5:
 				MAGIC_X = 55;
@@ -111,17 +169,19 @@ public class GridController
 		for (int i = 0; i < size; i++) {
 			ArrayList<Integer> rowCount = rowPanes.get(i);
 			ListIterator<Integer> it = rowCount.listIterator(rowCount.size());
-			int offset = 0;
+			int offsetX = 0;
 			while (it.hasPrevious()) {
 				int c = it.previous();
 				Text text = new Text(Integer.toString(c));
 				if (c >= 10)
-					offset -= 15;
-				text.setLayoutX(layoutX + offset - 20);
+					offsetX -= 15;
+				text.setLayoutX(layoutX + offsetX - 20);
 				text.setLayoutY(layoutY + i * paneSize + MAGIC_Y);
 				text.setFont(NUMBER_FONT);
+				text.setFill(FONT_COLOR);
 				backgroundPane.getChildren().add(text);
-				offset -= 20;
+				addedNodes.add(text);
+				offsetX -= 20;
 			}
 		}
 
@@ -129,17 +189,77 @@ public class GridController
 		for (int i = 0; i < size; i++) {
 			ArrayList<Integer> colCount = colPanes.get(i);
 			ListIterator<Integer> it = colCount.listIterator(colCount.size());
-			int offset = 0;
+			int offsetX = 0, offsetY = 0;
 			while (it.hasPrevious()) {
 				int c = it.previous();
 				Text text = new Text(Integer.toString(c));
-				text.setLayoutX(layoutX + i * paneSize + MAGIC_X);
-				text.setLayoutY(layoutY + offset - 10);
+				if (c >= 10)
+					offsetX -= 10;
+				text.setLayoutX(layoutX + i * paneSize + MAGIC_X + offsetX);
+				text.setLayoutY(layoutY + offsetY - 10);
 				text.setFont(NUMBER_FONT);
+				text.setFill(FONT_COLOR);
 				backgroundPane.getChildren().add(text);
-				offset -= 25;
+				addedNodes.add(text);
+				offsetY -= 25;
 			}
 		}
+	}
+
+	public void resetNodes() {
+		backgroundPane.getChildren().removeAll(addedNodes);
+		backgroundPane.getChildren().removeAll(HEART_PENS);
+		grid_5.setVisible(false);
+		grid_10.setVisible(false);
+		grid_15.setVisible(false);
+	}
+
+	private enum LeverState
+	{
+		O,
+		X,
+		R
+	}
+
+	@FXML
+	private void handleClickLever() {
+		if (isTransitioning)
+			return;
+		isTransitioning = true;
+		List<Pair<Integer, Integer>> seq = new ArrayList<>();
+		switch (state) {
+			case O:
+				seq.addAll(O_TO_X);
+				state = LeverState.X;
+				break;
+			case X:
+				seq.addAll(X_TO_R);
+				state = LeverState.R;
+				break;
+			case R:
+				seq.addAll(O_TO_X);
+				seq.addAll(X_TO_R);
+				Collections.reverse(seq);
+				state = LeverState.O;
+				break;
+		}
+		Timeline animation = new Timeline();
+		double duration = 1500, interval = duration / (seq.size() - 1);
+		for (int i = 0; i < seq.size(); i++) {
+			Pair<Integer, Integer> loc = seq.get(i);
+			int x = loc.getKey(), y = loc.getValue();
+			KeyFrame frame = new KeyFrame(new Duration(i * interval), new KeyValue(lever.layoutXProperty(), x), new KeyValue(lever.layoutYProperty(), y));
+			animation.getKeyFrames().add(frame);
+		}
+		animation.getKeyFrames().add(new KeyFrame(new Duration(duration), e -> isTransitioning = false));
+		animation.play();
+	}
+
+	@FXML
+	private void onClickBack() {
+		LevelController controller = GameLauncher.transitionTo(GameScene.LEVEL_SELECTION);
+		controller.resetNodes();
+		controller.chooseDifficulty(GameManager.SELECTED_DIFFICULTY);
 	}
 
 	public static void reveal(int x, int y) {
@@ -167,6 +287,7 @@ public class GridController
 				return;
 		}
 		image.setImage(level.getImage());
+		spawnHeartPens();
 	}
 
 	private static void onMouseEntered(Pane pane) {
