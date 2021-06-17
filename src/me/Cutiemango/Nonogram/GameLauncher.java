@@ -58,4 +58,24 @@ public class GameLauncher extends Application
 	public static void exit() {
 		currentStage.close();
 	}
+
+	public enum GameScene
+	{
+		MENU("/assets/Menu.fxml"),
+		DIFFICULTY_SELECTION("/assets/DifficultySelection.fxml"),
+		LEVEL_SELECTION("/assets/LevelSelection.fxml"),
+		GAME_OVER("/assets/GameOver.fxml"),
+		GAME_FINISH("/assets/GameFinish.fxml"),
+		GAME("/assets/Game.fxml");
+
+		GameScene(String fxmlLocation) {
+			this.fxmlLocation = fxmlLocation;
+		}
+
+		private final String fxmlLocation;
+
+		public String getFxmlLocation() {
+			return fxmlLocation;
+		}
+	}
 }

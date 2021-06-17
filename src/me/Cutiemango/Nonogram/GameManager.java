@@ -5,8 +5,6 @@ import javafx.util.Pair;
 import me.Cutiemango.Nonogram.controller.GameController;
 import me.Cutiemango.Nonogram.controller.GameFinishController;
 
-import static me.Cutiemango.Nonogram.controller.GameController.LeverState;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,6 +20,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import static me.Cutiemango.Nonogram.controller.GameController.LeverState;
+import static me.Cutiemango.Nonogram.GameLauncher.GameScene;
+import static me.Cutiemango.Nonogram.Nonogram.Difficulty;
 
 public class GameManager
 {
@@ -103,12 +105,12 @@ public class GameManager
 		if (state == LeverState.O) {
 			for (Pair<Integer, Integer> coord : selectedPanes) {
 				int x = coord.getKey(), y = coord.getValue();
-				if (!isAvailable(x, y))
-					continue;
-
-				if (fail) {
+				if (currentPanes[x][y] == PaneState.WRONG_PANE)
+					GameController.setWrongColor(x, y);
+				else
 					GameController.setNormalColor(x, y);
-				} else {
+
+				if (!fail && currentPanes[x][y] == PaneState.AVAILABLE) {
 					GameController.reveal(x, y);
 					currentPanes[x][y] = PaneState.REVEALED;
 					remainingPanes--;

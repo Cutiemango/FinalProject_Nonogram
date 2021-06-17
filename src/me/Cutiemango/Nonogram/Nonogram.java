@@ -88,4 +88,9 @@ public class Nonogram
 		this.image = image;
 	}
 
+	public enum Difficulty
+	{
+		EASY, NORMAL, HARD
+	}
+
 }

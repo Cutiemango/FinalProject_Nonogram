@@ -4,8 +4,9 @@ import javafx.fxml.FXML;
 import javafx.scene.image.ImageView;
 import me.Cutiemango.Nonogram.GameLauncher;
 import me.Cutiemango.Nonogram.GameManager;
-import me.Cutiemango.Nonogram.GameScene;
 import me.Cutiemango.Nonogram.Nonogram;
+
+import static me.Cutiemango.Nonogram.GameLauncher.GameScene;
 
 public class GameFinishController
 {

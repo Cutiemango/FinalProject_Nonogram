@@ -2,7 +2,8 @@ package me.Cutiemango.Nonogram.controller;
 
 import javafx.fxml.FXML;
 import me.Cutiemango.Nonogram.GameLauncher;
-import me.Cutiemango.Nonogram.GameScene;
+
+import static me.Cutiemango.Nonogram.GameLauncher.GameScene;
 
 public class MenuController
 {

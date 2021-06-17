@@ -5,14 +5,15 @@ import javafx.fxml.Initializable;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Rotate;
-import me.Cutiemango.Nonogram.Difficulty;
 import me.Cutiemango.Nonogram.GameLauncher;
 import me.Cutiemango.Nonogram.GameManager;
-import me.Cutiemango.Nonogram.GameScene;
 import me.Cutiemango.Nonogram.Vector2D;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+
+import static me.Cutiemango.Nonogram.GameLauncher.GameScene;
+import static me.Cutiemango.Nonogram.Nonogram.Difficulty;
 
 public class DifficultyController implements Initializable
 {

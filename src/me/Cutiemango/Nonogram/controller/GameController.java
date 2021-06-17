@@ -23,15 +23,15 @@ import javafx.util.Pair;
 import me.Cutiemango.Nonogram.DragHandler;
 import me.Cutiemango.Nonogram.GameLauncher;
 import me.Cutiemango.Nonogram.GameManager;
-import me.Cutiemango.Nonogram.GameScene;
 import me.Cutiemango.Nonogram.Main;
 import me.Cutiemango.Nonogram.Nonogram;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+
+import static me.Cutiemango.Nonogram.GameLauncher.GameScene;
 
 public class GameController
 {
