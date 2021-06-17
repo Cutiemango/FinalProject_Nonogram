@@ -78,6 +78,7 @@ public class LevelController
 			levelBlock.setFitWidth(200);
 			levelBlock.setLayoutX(pos.getKey());
 			levelBlock.setLayoutY(pos.getValue());
+			levelBlock.setOnMouseClicked(e -> startLevel(level.getID()));
 
 			ImageView levelImage = new ImageView(level.getImage());
 			levelImage.setFitHeight(170);

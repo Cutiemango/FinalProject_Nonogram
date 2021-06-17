@@ -29,6 +29,7 @@ import me.Cutiemango.Nonogram.Nonogram;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -54,19 +55,21 @@ public class GameController
 
 	@FXML
 	private ImageView image;
-
 	@FXML
 	private ImageView lever;
 
-	private LeverState state = LeverState.O;
 	private boolean isTransitioning = false;
 	private final List<Node> addedNodes = new ArrayList<>();
 
+	private static LeverState state = LeverState.O;
 	private static Pane[][] paneEntries;
+	private static ImageView[][] flags;
+	private static final Image FLAG_IMAGE;
 	private static final List<Pair<Integer, Integer>> O_TO_X, X_TO_R;
 	private static final List<ImageView> HEART_PENS = new ArrayList<>();
 
 	static {
+		FLAG_IMAGE = new Image(Main.getResource("/assets/background/flag.png").toString());
 		O_TO_X = new ArrayList<>();
 		O_TO_X.add(new Pair<>(950, 210));
 		O_TO_X.add(new Pair<>(1000, 210));
@@ -74,6 +77,7 @@ public class GameController
 		O_TO_X.add(new Pair<>(970, 320));
 
 		X_TO_R = new ArrayList<>();
+		X_TO_R.add(new Pair<>(970, 320));
 		X_TO_R.add(new Pair<>(950, 360));
 		X_TO_R.add(new Pair<>(935, 360));
 		X_TO_R.add(new Pair<>(935, 390));
@@ -81,8 +85,9 @@ public class GameController
 		X_TO_R.add(new Pair<>(975, 450));
 	}
 
-	private void initializePane(GridPane grid, int size) {
+	private void initializeGrid(GridPane grid, int size) {
 		paneEntries = new Pane[size][size];
+
 		grid.setVisible(true);
 		for (int row = 0; row < size; row++) {
 			for (int col = 0; col < size; col++) {
@@ -98,8 +103,36 @@ public class GameController
 		}
 	}
 
+	private void initializeFlag(GridPane grid, int size) {
+		flags = new ImageView[size][size];
+		double posX = grid.getLayoutX(), posY = grid.getLayoutY();
+		for (int x = 0; x < size; x++) {
+			for (int y = 0; y < size; y++) {
+				ImageView view = new ImageView(FLAG_IMAGE);
+				int flagSize = (int) (grid.getPrefWidth() / size);
+				view.setFitWidth(flagSize);
+				view.setFitHeight(flagSize);
+				view.setLayoutX(posX + flagSize * y);
+				view.setLayoutY(posY + flagSize * x);
+				view.setVisible(false);
+
+				int finalX = x, finalY = y;
+				view.setOnMouseClicked(e -> {
+					if (state == LeverState.R) {
+						view.setVisible(false);
+						GameManager.unmarkFlag(finalX, finalY);
+					}
+				});
+
+				flags[x][y] = view;
+				backgroundPane.getChildren().add(view);
+				addedNodes.add(view);
+			}
+		}
+	}
+
 	private void spawnHeartPens() {
-		int posX = 770, posY = 700;
+		int posX = 760, posY = 700;
 		Image heartPen =  new Image(Main.getResource("/assets/background/heartpen.png").toString());
 		for (int i = 0; i < GameManager.MAX_HEALTH; i++) {
 			ImageView heart = new ImageView(heartPen);
@@ -209,16 +242,27 @@ public class GameController
 	public void resetNodes() {
 		backgroundPane.getChildren().removeAll(addedNodes);
 		backgroundPane.getChildren().removeAll(HEART_PENS);
+		HEART_PENS.clear();
+
 		grid_5.setVisible(false);
+		grid_5.getChildren().clear();
+
 		grid_10.setVisible(false);
+		grid_10.getChildren().clear();
+
 		grid_15.setVisible(false);
+		grid_15.getChildren().clear();
 	}
 
-	private enum LeverState
+	public enum LeverState
 	{
 		O,
 		X,
 		R
+	}
+
+	public static LeverState getLeverState() {
+		return state;
 	}
 
 	@FXML
@@ -244,7 +288,7 @@ public class GameController
 				break;
 		}
 		Timeline animation = new Timeline();
-		double duration = 1500, interval = duration / (seq.size() - 1);
+		double duration = 1000, interval = duration / (seq.size() - 1);
 		for (int i = 0; i < seq.size(); i++) {
 			Pair<Integer, Integer> loc = seq.get(i);
 			int x = loc.getKey(), y = loc.getValue();
@@ -264,41 +308,44 @@ public class GameController
 
 	public static void reveal(int x, int y) {
 		paneEntries[x][y].setVisible(false);
+		flags[x][y].setVisible(false);
 	}
 
 	public void startLevel(Nonogram level) {
-		switch (level.getSize()) {
+		int size = level.getSize();
+		GridPane grid;
+		switch (size) {
 			case 5:
-				initializePane(grid_5, 5);
-				drawLines(grid_5, 5);
-				generateText(level, grid_5, 5);
+				grid = grid_5;
 				break;
 			case 10:
-				initializePane(grid_10, 10);
-				drawLines(grid_10, 10);
-				generateText(level, grid_10, 10);
+				grid = grid_10;
 				break;
 			case 15:
-				initializePane(grid_15, 15);
-				drawLines(grid_15, 15);
-				generateText(level, grid_15, 15);
+				grid = grid_15;
 				break;
 			default:
+				// invalid size
 				return;
 		}
-		image.setImage(level.getImage());
+		initializeGrid(grid, size);
+		initializeFlag(grid, size);
+		drawLines(grid, size);
+		generateText(level, grid, size);
 		spawnHeartPens();
+
+		image.setImage(level.getImage());
 	}
 
 	private static void onMouseEntered(Pane pane) {
 		int x = GridPane.getRowIndex(pane), y = GridPane.getColumnIndex(pane);
-		if (!GameManager.hasSelected(x, y))
+		if (GameManager.isAvailable(x, y))
 			setHoverColor(x, y);
 	}
 
 	private static void onMouseExited(Pane pane) {
 		int x = GridPane.getRowIndex(pane), y = GridPane.getColumnIndex(pane);
-		if (!GameManager.hasSelected(x, y))
+		if (GameManager.isAvailable(x, y))
 			setNormalColor(x, y);
 	}
 
@@ -314,6 +361,15 @@ public class GameController
 		pane.setBackground(new Background(new BackgroundFill(WRONG_PANE_COLOR, CornerRadii.EMPTY, Insets.EMPTY)));
 	}
 
+	public static void setMarked(int x, int y) {
+		flags[x][y].setVisible(true);
+	}
+
+	public static void setUnmarked(int x, int y) {
+		flags[x][y].setVisible(false);
+
+	}
+
 	public static void setHoverColor(int x, int y) {
 		setHoverColor(paneEntries[x][y]);
 	}
@@ -325,4 +381,5 @@ public class GameController
 	public static void setWrongColor(int x, int y) {
 		setWrongColor(paneEntries[x][y]);
 	}
+
 }

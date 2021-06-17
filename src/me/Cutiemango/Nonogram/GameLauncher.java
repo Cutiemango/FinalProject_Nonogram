@@ -23,10 +23,16 @@ public class GameLauncher extends Application
 	@Override
 	public void start(Stage stage) {
 		GameManager.loadNonogram();
+		GameManager.readData();
+
 		currentStage = stage;
 		currentStage.setTitle("Nonogram");
+		currentStage.setOnCloseRequest(e -> GameManager.saveData());
 
 		transitionTo(GameScene.MENU);
+		currentStage.setWidth(1200);
+		currentStage.setHeight(930);
+		currentStage.setResizable(false);
 		currentStage.show();
 	}
 

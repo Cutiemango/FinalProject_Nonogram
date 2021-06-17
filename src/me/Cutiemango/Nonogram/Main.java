@@ -1,5 +1,6 @@
 package me.Cutiemango.Nonogram;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -7,6 +8,11 @@ public class Main
 {
 	public static void main(String[] args) {
 		GameLauncher.main(args);
+	}
+
+	public static String getPath() {
+		File dir = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		return dir.getParent();
 	}
 
 	public static URL getResource(String name) {

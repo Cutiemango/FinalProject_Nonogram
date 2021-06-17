@@ -5,6 +5,8 @@ public enum GameScene
 	MENU("/assets/Menu.fxml"),
 	DIFFICULTY_SELECTION("/assets/DifficultySelection.fxml"),
 	LEVEL_SELECTION("/assets/LevelSelection.fxml"),
+	GAME_OVER("/assets/GameOver.fxml"),
+	GAME_FINISH("/assets/GameFinish.fxml"),
 	GAME("/assets/Game.fxml");
 
 	GameScene(String fxmlLocation) {
